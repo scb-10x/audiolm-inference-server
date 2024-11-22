@@ -1,12 +1,7 @@
-import base64
-import io
-import json
 import time
 from typing import AsyncGenerator
 from fastapi.responses import StreamingResponse
 import librosa
-import numpy as np
-import requests
 from utils import get_either, get_file_from_any
 from vllm import AsyncEngineArgs, AsyncLLMEngine, SamplingParams
 from entity.entity import (
@@ -24,7 +19,7 @@ class VLLMHandler(BaseHandler):
 
     def __init__(self, model_name: str):
         super().__init__(model_name)
-        engine_args = AsyncEngineArgs(model=model_name, max_model_len=4096)
+        engine_args = AsyncEngineArgs(model=model_name, max_model_len=2048, gpu_memory_utilization=0.4, enforce_eager=True)
         llm = AsyncLLMEngine.from_engine_args(engine_args)
         self.processor = AutoProcessor.from_pretrained(model_name)
         self.llm = llm

@@ -4,10 +4,12 @@ from typing import Any, List, Literal, Optional, Union
 from typing_extensions import Required, TypedDict, TypeAlias
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from openai.types.chat import (
-    ChatCompletionContentPartParam as OpenAIChatCompletionContentPartParam)
+    ChatCompletionContentPartParam as OpenAIChatCompletionContentPartParam,
+)
 from utils import random_uuid
 
 logger = logging.getLogger(__name__)
+
 
 class OpenAIBaseModel(BaseModel):
     # OpenAI API does allow extra fields
@@ -64,15 +66,23 @@ class CustomChatCompletionContentSimpleAudioParam(TypedDict, total=False):
     type: str
     audio_url: Required[str]
 
+
 class CustomChatCompletionContentSimpleTextParam(TypedDict, total=False):
     type: str
     text: Required[str]
 
 
-ChatCompletionContentPartParam: TypeAlias =  Union[OpenAIChatCompletionContentPartParam, CustomChatCompletionContentSimpleTextParam, CustomChatCompletionContentSimpleAudioParam, str]
+ChatCompletionContentPartParam: TypeAlias = Union[
+    OpenAIChatCompletionContentPartParam,
+    CustomChatCompletionContentSimpleTextParam,
+    CustomChatCompletionContentSimpleAudioParam,
+    str,
+]
+
 
 class ChatCompletionMessageParam(TypedDict, total=False):
     """Enables custom roles in the Chat Completion API."""
+
     role: Required[str]
     """The role of the message's author."""
 
@@ -86,14 +96,14 @@ class ChatCompletionMessageParam(TypedDict, total=False):
     same role.
     """
 
+
 class ChatCompletionRequest(OpenAIBaseModel):
     # Ordered by official OpenAI API documentation
     # https://platform.openai.com/docs/api-reference/chat/create
     messages: List[ChatCompletionMessageParam]
     model: str
     frequency_penalty: Optional[float] = 0.0
-    max_tokens: Optional[int] = Field(
-        default=None)
+    max_tokens: Optional[int] = Field(default=128)
     max_completion_tokens: Optional[int] = None
     stop: Optional[Union[str, List[str]]] = Field(default_factory=list)
     stream: Optional[bool] = False
@@ -107,4 +117,6 @@ class ChatCompletionRequest(OpenAIBaseModel):
         description=(
             "The request_id related to this request. If the caller does "
             "not set it, a random_uuid will be generated. This id is used "
-            "through out the inference process and return in response."))
+            "through out the inference process and return in response."
+        ),
+    )

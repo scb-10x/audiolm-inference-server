@@ -1,10 +1,8 @@
-import json
+
 import time
-from typing import AsyncGenerator, Generator
 from fastapi.responses import StreamingResponse
 import librosa
 import numpy as np
-import requests
 from entity.entity import (
     ChatCompletionResponseStreamChoice,
     ChatCompletionStreamResponse,
@@ -12,11 +10,9 @@ from entity.entity import (
     UsageInfo,
 )
 from handler.base_handler import BaseHandler
-from datasets import Audio
 from transformers import AutoModel
-from transformers.pipelines.audio_utils import ffmpeg_read
 
-from utils import random_uuid, get_file_from_any
+from utils import get_either, get_file_from_any
 
 
 class HuggingfaceHandler(BaseHandler):
@@ -55,17 +51,19 @@ class HuggingfaceHandler(BaseHandler):
                 " text."
             ),
             do_sample=request.temperature > 0.005,
-            max_new_tokens=256,
+            max_new_tokens=get_either(
+                [request.max_completion_tokens, request.max_tokens]
+            ),
         )
 
         # Streaming case
         def stream_results():
             prev_output = ""
             for text_output in results_generator:
-                delta_text = text_output[len(prev_output):]
+                delta_text = text_output[len(prev_output) :]
                 finish_reason = None
-                if delta_text == '':
-                    finish_reason = 'stop'
+                if delta_text == "":
+                    finish_reason = "stop"
                 choice_data = ChatCompletionResponseStreamChoice(
                     index=0,
                     delta=DeltaMessage(content=delta_text),
