@@ -86,7 +86,7 @@ class HuggingfaceHandler(BaseHandler):
                 prev_output = text_output
             choice_data = ChatCompletionResponseStreamChoice(
                 index=0,
-                delta=DeltaMessage(content=prev_output),
+                delta=DeltaMessage(content=''),
                 logprobs=None,
                 finish_reason=finish_reason,
             )

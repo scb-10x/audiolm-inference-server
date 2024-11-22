@@ -19,7 +19,12 @@ class VLLMHandler(BaseHandler):
 
     def __init__(self, model_name: str):
         super().__init__(model_name)
-        engine_args = AsyncEngineArgs(model=model_name, max_model_len=2048, gpu_memory_utilization=0.4, enforce_eager=True)
+        engine_args = AsyncEngineArgs(
+            model=model_name,
+            max_model_len=2048,
+            gpu_memory_utilization=0.4,
+            enforce_eager=True,
+        )
         llm = AsyncLLMEngine.from_engine_args(engine_args)
         self.processor = AutoProcessor.from_pretrained(model_name)
         self.llm = llm
@@ -33,25 +38,32 @@ class VLLMHandler(BaseHandler):
                 for ele in message["content"]:
                     if ele["type"] == "audio":
                         audio_infos_vllm.append(ele["audio_url"])
-
-        inputs = {
-            "prompt": self.processor.apply_chat_template(
+        if len(audio_infos_vllm) > 0:
+            inputs = {
+                "prompt": self.processor.apply_chat_template(
+                    request.messages,
+                    add_generation_prompt=True,
+                    tokenize=True,
+                    add_audio_id=True,
+                ),
+                "multi_modal_data": {
+                    "audio": [
+                        librosa.load(get_file_from_any(a)) for a in audio_infos_vllm
+                    ]
+                },
+            }
+            engine_prompt = token_inputs(
+                prompt_token_ids=inputs["prompt"],
+                multi_modal_data=inputs["multi_modal_data"],
+            )
+        else:
+            engine_prompt = self.processor.apply_chat_template(
                 request.messages,
                 add_generation_prompt=True,
-                tokenize=True,
-                add_audio_id=True,
-            ),
-            "multi_modal_data": {
-                "audio": [
-                    librosa.load(get_file_from_any(a))
-                    for a in audio_infos_vllm
-                ]
-            },
-        }
-        engine_prompt = token_inputs(
-            prompt_token_ids=inputs["prompt"],
-            multi_modal_data=inputs["multi_modal_data"],
-        )
+                tokenize=False,
+                add_audio_id=False,
+            )
+
         results_generator = self.llm.generate(
             engine_prompt,
             SamplingParams(
@@ -94,7 +106,7 @@ class VLLMHandler(BaseHandler):
                 prev_output = output.text
             choice_data = ChatCompletionResponseStreamChoice(
                 index=0,
-                delta=DeltaMessage(content=prev_output),
+                delta=DeltaMessage(content=''),
                 logprobs=None,
                 finish_reason=output.finish_reason,
             )
