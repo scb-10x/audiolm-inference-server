@@ -1,13 +1,13 @@
 
-from fastapi import FastAPI, Request
-from fastapi.responses import Response, StreamingResponse
+from fastapi import FastAPI
+from fastapi.responses import Response
 from handler.handler import get_handler
 from entity.entity import ChatCompletionRequest
-
+import os
 app = FastAPI()
 
 # handler = get_handler('Qwen/Qwen2-Audio-7B-Instruct')
-handler = get_handler("WillHeld/DiVA-llama-3-v0-8b")
+handler = get_handler(os.environ['MODEL_NAME'])
 
 @app.get("/health")
 async def health() -> Response:
