@@ -1,0 +1,4 @@
+[submodule "thirdparty/vllm"]
+	path = thirdparty/vllm
+	url = https://github.com/kunato/vllm.git
+	branch = audiollm
