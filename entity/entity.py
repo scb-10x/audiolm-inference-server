@@ -103,7 +103,7 @@ class ChatCompletionRequest(OpenAIBaseModel):
     messages: List[ChatCompletionMessageParam]
     model: str
     frequency_penalty: Optional[float] = 0.0
-    max_tokens: Optional[int] = Field(default=128)
+    max_tokens: Optional[int] = Field(default=1024)
     max_completion_tokens: Optional[int] = None
     stop: Optional[Union[str, List[str]]] = Field(default_factory=list)
     stream: Optional[bool] = False
