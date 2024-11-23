@@ -1,3 +1,4 @@
+import os
 import time
 from typing import AsyncGenerator
 from fastapi.responses import StreamingResponse
@@ -22,7 +23,7 @@ class VLLMHandler(BaseHandler):
         engine_args = AsyncEngineArgs(
             model=model_name,
             max_model_len=2048,
-            gpu_memory_utilization=0.4,
+            gpu_memory_utilization=float(os.environ.get('GPU_MEMORY_UTILIZATION', 0.4)),
             enforce_eager=True,
         )
         llm = AsyncLLMEngine.from_engine_args(engine_args)
