@@ -10,7 +10,7 @@ from utils import random_uuid
 
 logger = logging.getLogger(__name__)
 
-
+# Most of this code is copy from vllm project
 class OpenAIBaseModel(BaseModel):
     # OpenAI API does allow extra fields
     model_config = ConfigDict(extra="allow")

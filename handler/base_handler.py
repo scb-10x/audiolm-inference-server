@@ -1,5 +1,3 @@
-
-
 from fastapi import Response
 from entity.entity import ChatCompletionRequest
 from abc import ABC, abstractmethod
