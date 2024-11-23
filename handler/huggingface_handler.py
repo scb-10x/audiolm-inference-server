@@ -2,6 +2,7 @@ import time
 from fastapi.responses import StreamingResponse
 import librosa
 import numpy as np
+import torch
 from entity.entity import (
     ChatCompletionResponseStreamChoice,
     ChatCompletionStreamResponse,
@@ -18,9 +19,10 @@ class HuggingfaceHandler(BaseHandler):
 
     def __init__(self, model_name: str, sample_rate=16000):
         super().__init__(model_name)
-        self.model = AutoModel.from_pretrained(model_name, trust_remote_code=True)
+        self.model = AutoModel.from_pretrained(model_name, trust_remote_code=True).to('cuda')
         self.sample_rate = sample_rate
 
+    @torch.no_grad()
     def generate_stream(self, request):
         audio_infos_vllm = []
         for message in request.messages:

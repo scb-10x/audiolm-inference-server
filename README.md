@@ -15,3 +15,13 @@ current implement version of qwen-audio is not work yet. there are need for cust
 MODEL_NAME="WillHeld/DiVA-llama-3-v0-8b" uvicorn api_server:app --port 40021
 MODEL_NAME="Qwen/Qwen2-Audio-7B-Instruct" GPU_MEMORY_UTILIZATION=0.5 uvicorn api_server:app --port 40020
 ```
+
+### Step to setup on runpod
+```
+git clone this repo
+git submodule init
+git submodule update
+cd thirdparty/vllm
+export MAX_JOBS=18
+pip install -e .
+```
