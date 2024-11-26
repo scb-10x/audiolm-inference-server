@@ -13,7 +13,7 @@ from entity.entity import (
 from handler.base_handler import BaseHandler
 from transformers import AutoProcessor
 from transformers import pipeline
-
+import librosa
 
 class ASRPipelineHandler(BaseHandler):
 
@@ -37,26 +37,32 @@ class ASRPipelineHandler(BaseHandler):
         self.asr_pipe = asr_pipe
 
     def generate_stream(self, request):
+        conversations = []
         for message in request.messages:
             if isinstance(message["content"], list):
                 cur_audio_text = None
                 for ele in message["content"]:
                     if ele["type"] == "audio":
+                        audio, sr = librosa.load(get_file_from_any(ele["audio_url"]))
                         cur_audio_text = self.asr_pipe(
-                            get_file_from_any(a),
+                            audio,
                             generate_kwargs={"task": "transcribe"},
                             return_timestamps=False,
                         )["text"]
                 if cur_audio_text is not None:
+                    text = None
                     for ele in message["content"]:
                         if ele["type"] == "text":
-                            if '<audio>' in ele['content']:
-                                ele["content"].replace("<audio>", cur_audio_text)
+                            if '<audio>' in ele['text']:
+                                text = ele["text"].replace("<audio>",  f'"{cur_audio_text}"')
                             else:
-                                ele['content'] = ele['content'] + cur_audio_text
-        
+                                text = ele['text'] + cur_audio_text
+                    if text is not None:
+                        conversations.append({'role': message['role'], 'content': text})
+            else:
+                conversations.append({'role': message['role'], 'content': message['content']})
         engine_prompt = self.processor.apply_chat_template(
-            request.messages,
+            conversations,
             add_generation_prompt=True,
             tokenize=False,
         )
