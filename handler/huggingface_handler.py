@@ -76,7 +76,7 @@ class HuggingfaceHandler(BaseHandler):
                     object="chat.completion.chunk",
                     created=int(time.time()),
                     choices=[choice_data],
-                    model=self.model_name,
+                    model=self.get_base_model_name(),
                 )
                 chunk.usage = UsageInfo(
                     prompt_tokens=0, completion_tokens=0, total_tokens=0
@@ -96,7 +96,7 @@ class HuggingfaceHandler(BaseHandler):
                 object="chat.completion.chunk",
                 created=int(time.time()),
                 choices=[choice_data],
-                model=self.model_name,
+                model=self.get_base_model_name(),
                 usage=UsageInfo(prompt_tokens=0, completion_tokens=0, total_tokens=0),
             )
             final_usage_data = final_usage_chunk.model_dump_json(
