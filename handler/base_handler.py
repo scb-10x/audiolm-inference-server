@@ -1,5 +1,3 @@
-
-
 from fastapi import Response
 from entity.entity import ChatCompletionRequest
 from abc import ABC, abstractmethod
@@ -17,4 +15,9 @@ class BaseHandler(ABC):
     @abstractmethod
     def generate(self, request: ChatCompletionRequest) -> Response:
         raise NotImplementedError()
+    
+    def get_base_model_name(self):
+        if '/' in self.model_name:
+            return self.model_name.split('/')[-1]
+        return self.model_name
         
